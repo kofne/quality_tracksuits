@@ -9,11 +9,13 @@ interface PayPalProviderProps {
 
 export function PayPalProvider({ children, clientId }: PayPalProviderProps) {
   return (
-    <PayPalScriptProvider options={{ 
-      clientId: clientId,
-      currency: "USD",
-      intent: "capture"
-    }}>
+    <PayPalScriptProvider 
+      options={{ 
+        clientId: clientId,
+        currency: "USD",
+        intent: "capture"
+      }}
+    >
       {children}
     </PayPalScriptProvider>
   );

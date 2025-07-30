@@ -4,8 +4,8 @@ import { Header } from '@/components/header';
 import { PayPalProvider } from '@/components/paypal-provider';
 
 export const metadata: Metadata = {
-  title: 'Frontal Hairs - Premium Hair Collection',
-  description: 'Select from our premium collection of frontal hairs. High-quality hair pieces for the perfect look.',
+  title: 'Gucci Tracksuits - Premium Tracksuit Collection',
+  description: 'Select from our premium collection of Gucci tracksuits. High-quality tracksuits for men, women, and kids.',
   generator: 'v0.dev',
 }
 

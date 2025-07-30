@@ -1,4 +1,4 @@
-﻿export const frontalHairImages = [
+﻿export const tracksuitImages = [
   "1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.jpg", "8.jpg", "9.jpg", "10.png",
   "11.jpg", "12.png", "13.jpg", "14.jpg", "15.jpg", "16.jpg", "17.jpg", "18.jpg", "19.jpg", "20.jpg",
   "21.jpg", "22.jpg", "23.jpg", "24.jpg", "25.jpg", "26.jpg", "27.jpg", "28.png", "29.jpg", "30.jpg",
@@ -33,9 +33,9 @@
   "318.jpg", "319.jpg", "320.jpg", "321.jpg", "322.jpg", "323.jpg", "324.jpg", "325.jpg"
 ];
 
-export const hairData = {
-  name: 'Frontal Hairs',
-  folder: 'Frontal Hairs',
-  images: frontalHairImages,
+export const tracksuitData = {
+  name: 'Gucci Tracksuits',
+  folder: 'Gucci Tracksuits',
+  images: tracksuitImages,
   price: 250
 };

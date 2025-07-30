@@ -27,10 +27,10 @@ export async function POST(request: NextRequest) {
     const mailOptions = {
       from: process.env.GMAIL_USER,
       to: 'solkim1985@gmail.com',
-      subject: 'New Frontal Hair Order',
+      subject: 'New Gucci Tracksuits Order',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #8B4513;">🎉 New Frontal Hair Order Received!</h2>
+          <h2 style="color: #8B4513;">🎉 New Gucci Tracksuits Order Received!</h2>
           <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #DC143C; margin-top: 0;">Customer Information</h3>
             <p><strong>Name:</strong> ${formData.name}</p>
@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
           </div>
           <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #DC143C; margin-top: 0;">Product Details</h3>
-            <p><strong>Quantity:</strong> ${quantity} frontal hair${quantity > 1 ? 's' : ''}</p>
-            <p><strong>Selected Images:</strong> ${selectedItems.map(item => item.image).join(', ')}</p>
+            <p><strong>Quantity:</strong> ${quantity} tracksuit${quantity > 1 ? 's' : ''}</p>
+            <p><strong>Selected Images:</strong> ${selectedItems.map((item: any) => item.image).join(', ')}</p>
           </div>
           <div style="background: #8B4513; color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0;">💰 Payment Details</h3>

@@ -1,212 +1,188 @@
 'use client';
 
-import { useState } from 'react'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  CheckCircle,
-  AlertCircle,
-  Copy,
-  Users,
-  DollarSign,
-} from 'lucide-react'
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Users, Share2, Copy, CheckCircle, Loader2 } from 'lucide-react';
+import { createReferralCode } from '@/lib/firestore';
 
 export function ReferralCreator() {
-  const [email, setEmail] = useState('')
-  const [paypalEmail, setPaypalEmail] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [referralCode, setReferralCode] = useState('')
-  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
-  const [errorMessage, setErrorMessage] = useState('')
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [referralCode, setReferralCode] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setStatus('idle')
-    setErrorMessage('')
+  const handleCreateReferral = async () => {
+    if (!name.trim() || !email.trim()) {
+      setError('Please enter both name and email');
+      return;
+    }
+
+    setIsCreating(true);
+    setError('');
 
     try {
-      const response = await fetch('/api/create-referral', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, paypalEmail }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setReferralCode(data.referralCode)
-        setStatus('success')
+      const result = await createReferralCode(email, name);
+      if (result.success) {
+        setReferralCode(result.referralCode);
       } else {
-        setErrorMessage(data.error || 'Failed to create referral code')
-        setStatus('error')
+        setError('Failed to create referral code');
       }
-    } catch {
-      setErrorMessage('Network error. Please try again.')
-      setStatus('error')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(referralCode)
-      alert('Referral code copied to clipboard!')
     } catch (error) {
-      console.error('Failed to copy:', error)
+      console.error('Error creating referral code:', error);
+      setError('Failed to create referral code. Please try again.');
+    } finally {
+      setIsCreating(false);
     }
-  }
+  };
+
+  const generateReferralLink = () => {
+    if (!referralCode) return '';
+    const baseUrl = window.location.origin;
+    return `${baseUrl}?ref=${referralCode}`;
+  };
+
+  const copyReferralLink = async () => {
+    try {
+      await navigator.clipboard.writeText(generateReferralLink());
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy referral link:', error);
+      setError('Failed to copy link to clipboard');
+    }
+  };
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-amber-50 via-red-50 to-brown-50 p-4'>
-      <div className='max-w-2xl mx-auto'>
-        <div className='text-center mb-8'>
-          <h1 className='text-4xl md:text-6xl font-bold text-brown-800 mb-4'>
-            🎯 Become an Affiliate
-          </h1>
-          <p className='text-xl text-brown-600'>
-            Create your referral code and earn{' '}
-            <span className='font-bold text-red-600'>$100</span> for each
-            successful referral!
-          </p>
-        </div>
-
-        <Card className='bg-white/80 backdrop-blur-sm border-brown-200'>
+    <Card className="bg-white/90 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className='flex items-center gap-2 text-brown-800'>
-              <Users className='w-6 h-6' />
+        <CardTitle className="flex items-center gap-2">
+          <Users className="w-5 h-5" />
               Create Your Referral Code
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className='space-y-4'>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-gray-600">
+          Create a referral code and earn $100 for each friend who completes an order using your link!
+        </p>
+
+        {!referralCode ? (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Your Name <span className="text-red-500">*</span>
+              </label>
+              <Input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
               <div>
-                <Label htmlFor='email' className='text-brown-700'>
-                  Email Address
-                </Label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Your Email <span className="text-red-500">*</span>
+              </label>
                 <Input
-                  id='email'
-                  type='email'
+                type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder='your@email.com'
+                placeholder="Enter your email address"
                   required
-                  className='border-brown-300'
                 />
+              </div>
+            <Button
+              onClick={handleCreateReferral}
+              disabled={isCreating || !name.trim() || !email.trim()}
+              className="w-full"
+            >
+              {isCreating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Users className="w-4 h-4 mr-2" />
+                  Create Referral Code
+                </>
+              )}
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+              <div className="flex items-center gap-2 text-green-800 mb-2">
+                <CheckCircle className="w-5 h-5" />
+                <span className="font-semibold">Referral Code Created!</span>
+              </div>
+              <p className="text-sm text-green-700">
+                Your referral code: <Badge variant="secondary" className="ml-1">{referralCode}</Badge>
+              </p>
               </div>
 
               <div>
-                <Label htmlFor='paypalEmail' className='text-brown-700'>
-                  PayPal Email
-                </Label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Your Referral Link
+              </label>
+              <div className="flex gap-2">
                 <Input
-                  id='paypalEmail'
-                  type='email'
-                  value={paypalEmail}
-                  onChange={(e) => setPaypalEmail(e.target.value)}
-                  placeholder='your@paypal.com'
-                  required
-                  className='border-brown-300'
+                  value={generateReferralLink()}
+                  readOnly
+                  className="text-sm"
                 />
-                <p className='text-sm text-brown-600 mt-1'>
-                  This is where your $100 bonus will be sent when someone uses
-                  your referral code.
-                </p>
+                <Button
+                  size="sm"
+                  onClick={copyReferralLink}
+                  variant={isCopied ? "default" : "outline"}
+                >
+                  {isCopied ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+              {isCopied && (
+                <p className="text-sm text-green-600 mt-1">Link copied to clipboard!</p>
+              )}
+            </div>
+
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">How it works:</h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Share your referral link with friends</li>
+                <li>• When they complete an order (25+ items), you earn $100</li>
+                <li>• Track your earnings in your account</li>
+                <li>• No limit on how many friends you can refer!</li>
+              </ul>
               </div>
 
               <Button
-                type='submit'
-                disabled={isSubmitting || !email || !paypalEmail}
-                className='w-full bg-red-600 hover:bg-red-700'
-              >
-                {isSubmitting ? 'Creating...' : 'Create Referral Code'}
-              </Button>
-            </form>
-
-            {status === 'success' && (
-              <div className='mt-6 p-4 bg-green-50 border border-green-200 rounded-lg'>
-                <div className='flex items-center gap-3 text-green-800 mb-3'>
-                  <CheckCircle className='w-6 h-6' />
-                  <h3 className='font-semibold'>Referral Code Created!</h3>
-                </div>
-                <div className='bg-white p-3 rounded border border-green-300'>
-                  <div className='flex items-center justify-between'>
-                    <span className='font-mono text-lg font-bold text-green-700'>
-                      {referralCode}
-                    </span>
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      onClick={copyToClipboard}
-                    >
-                      <Copy className='w-4 h-4 mr-2' />
-                      Copy
+              variant="outline"
+              onClick={() => {
+                setReferralCode('');
+                setName('');
+                setEmail('');
+              }}
+              className="w-full"
+            >
+              Create Another Code
                     </Button>
-                  </div>
-                </div>
-                <p className='text-sm text-green-700 mt-2'>
-                  Share this code with friends and earn $100 for each successful
-                  purchase!
-                </p>
               </div>
             )}
 
-            {status === 'error' && (
-              <div className='mt-6 p-4 bg-red-50 border border-red-200 rounded-lg'>
-                <div className='flex items-center gap-3 text-red-800'>
-                  <AlertCircle className='w-6 h-6' />
-                  <div>
-                    <h3 className='font-semibold'>Error</h3>
-                    <p>{errorMessage}</p>
-                  </div>
-                </div>
+        {error && (
+          <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+            {error}
               </div>
             )}
           </CardContent>
         </Card>
-
-        <Card className='mt-8 bg-white/80 backdrop-blur-sm border-brown-200'>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2 text-brown-800'>
-              <DollarSign className='w-6 h-6' />
-              How It Works
-            </CardTitle>
-          </CardHeader>
-          <CardContent className='space-y-4'>
-            <div className='grid md:grid-cols-3 gap-4'>
-              <div className='text-center p-4 bg-amber-50 rounded-lg'>
-                <div className='text-3xl mb-2'>1️⃣</div>
-                <h3 className='font-semibold text-brown-800'>Create Code</h3>
-                <p className='text-sm text-brown-600'>
-                  Generate your unique referral code
-                </p>
-              </div>
-              <div className='text-center p-4 bg-red-50 rounded-lg'>
-                <div className='text-3xl mb-2'>2️⃣</div>
-                <h3 className='font-semibold text-brown-800'>Share</h3>
-                <p className='text-sm text-brown-600'>
-                  Share your code with friends and family
-                </p>
-              </div>
-              <div className='text-center p-4 bg-green-50 rounded-lg'>
-                <div className='text-3xl mb-2'>3️⃣</div>
-                <h3 className='font-semibold text-brown-800'>Earn</h3>
-                <p className='text-sm text-brown-600'>
-                  Get $100 for each successful referral
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
+  );
 }

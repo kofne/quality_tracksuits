@@ -1,12 +1,14 @@
 {
-  "name": "frontal-hairs",
+  "name": "premium-tracksuits-store",
   "version": "0.1.0",
   "private": true,
+  "description": "High-quality branded tracksuits eCommerce store for Kids, Ladies, and Men",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate-images": "node scripts/generate-product-images.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -50,12 +52,12 @@
     "firebase-admin": "^13.4.0",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
-    "next": "15.2.4",
+    "next": "^15.2.4",
     "next-themes": "^0.4.4",
     "nodemailer": "^7.0.3",
-    "react": "^19",
+    "react": "^19.1.0",
     "react-day-picker": "8.10.1",
-    "react-dom": "^19",
+    "react-dom": "^19.1.0",
     "react-hook-form": "^7.54.1",
     "react-resizable-panels": "^2.1.7",
     "recharts": "2.15.0",
@@ -74,5 +76,17 @@
     "postcss": "^8.5",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
-  }
+  },
+  "keywords": [
+    "ecommerce",
+    "tracksuits",
+    "nextjs",
+    "typescript",
+    "tailwindcss",
+    "paypal",
+    "firebase",
+    "referral-system"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
 }

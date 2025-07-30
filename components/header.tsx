@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ContactForm } from '@/components/contact-form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Mail, Menu, X, LogIn, LogOut, User } from 'lucide-react';
+import { Mail, Menu, X, LogIn, LogOut, User, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -68,13 +68,13 @@ export function Header() {
   };
 
   return (
-    <header className="bg-cover bg-center bg-no-repeat border-b border-brown-200 sticky top-0 z-50" style={{ backgroundImage: 'url(/images/headers.jpeg)' }}>
+    <header className="bg-cover bg-center bg-no-repeat border-b border-brown-200 sticky top-0 z-50 header-background">
       <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo/Title */}
           <div className="flex items-center gap-2 sm:gap-4">
             <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] [text-shadow:_2px_2px_4px_rgba(0,0,0,0.8),_0_0_20px_rgba(255,255,255,0.6)]">
-              🎯💎 Frontal Hair Collection
+              🎯💎 Gucci Tracksuits
             </h1>
           </div>
 
@@ -159,6 +159,17 @@ export function Header() {
               </>
             )}
             
+            {/* WhatsApp Chat Button */}
+            <a
+              href="https://wa.me/26777746888?text=Hi! I'm interested in Gucci Tracksuits. Can you help me with my order?"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors font-bold shadow-lg"
+            >
+              <MessageCircle className="w-5 h-5" />
+              <span className="hidden sm:inline">Chat with us on WhatsApp</span>
+            </a>
+
             {/* Contact Section */}
             <div className="bg-contact-blue p-1 px-2 rounded-md inline-flex flex-col items-center w-auto">
               <h2 className="text-bright-blue text-lg font-bold mb-0 text-center leading-tight">Contact Us</h2>
@@ -288,6 +299,20 @@ export function Header() {
               </div>
             )}
             
+            {/* WhatsApp Chat Button - Mobile */}
+            <div className="mb-3">
+              <a
+                href="https://wa.me/26777746888?text=Hi! I'm interested in Gucci Tracksuits. Can you help me with my order?"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-md transition-colors shadow-lg"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <MessageCircle className="w-5 h-5 inline mr-2" />
+                Chat with us on WhatsApp
+              </a>
+            </div>
+
             <div className="bg-contact-blue p-3 rounded-md">
               <h2 className="text-bright-blue text-base font-bold mb-2 text-center">Contact Us</h2>
               <p className="text-white text-sm text-center mb-3">Get in touch with us today!</p>

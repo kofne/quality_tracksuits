@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { PayPalPaymentData } from "@/types/form";
-import { usePayPalScriptReducer, PayPalButtons } from "@paypal/react-paypal-js";
+'use client';
 
-declare global {
-  interface Window {
-    paypal?: {
-      Buttons: (config: unknown) => { render: (container: HTMLElement) => void };
-    };
-  }
+import { useState } from "react";
+import { PayPalButtons } from "@paypal/react-paypal-js";
+
+interface PayPalPaymentData {
+  paymentID: string;
+  orderID: string;
+  payerName: string;
+  amount: number;
+  status: string;
 }
 
 interface PayPalButtonProps {
@@ -17,8 +18,53 @@ interface PayPalButtonProps {
 }
 
 export function PayPalButton({ amount, onPaymentComplete, disabled = false }: PayPalButtonProps) {
-  const [{ isPending }] = usePayPalScriptReducer();
-  const [paypalError, setPaypalError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const createOrder = (data: any, actions: any) => {
+    return actions.order.create({
+      purchase_units: [
+        {
+          amount: {
+            value: amount.toFixed(2),
+            currency_code: "USD"
+          },
+          description: "Gucci Tracksuits Order"
+        }
+      ],
+      application_context: {
+        shipping_preference: "NO_SHIPPING"
+      }
+    });
+  };
+
+  const onApprove = async (data: any, actions: any) => {
+    setIsProcessing(true);
+    
+    try {
+      const order = await actions.order.capture();
+      
+      const paymentData: PayPalPaymentData = {
+        paymentID: order.id,
+        orderID: order.id,
+        payerName: order.payer.name?.given_name + ' ' + order.payer.name?.surname || 'Customer',
+        amount: amount,
+        status: order.status
+      };
+      
+      onPaymentComplete(paymentData);
+      setIsProcessing(false);
+    } catch (error) {
+      console.error('PayPal payment error:', error);
+      alert('Payment failed. Please try again.');
+      setIsProcessing(false);
+    }
+  };
+
+  const onError = (err: any) => {
+    console.error('PayPal error:', err);
+    alert('Payment failed. Please try again.');
+    setIsProcessing(false);
+  };
 
   if (disabled) {
     return (
@@ -28,66 +74,24 @@ export function PayPalButton({ amount, onPaymentComplete, disabled = false }: Pa
     );
   }
 
-  if (isPending) {
-    return (
-      <div className="w-full p-4 text-center text-gray-600 bg-gray-50 rounded-lg">
-        <p>Loading PayPal...</p>
-      </div>
-    );
-  }
-
-  if (paypalError) {
-    return (
-      <div className="w-full p-4 text-center text-red-600 bg-red-50 rounded-lg">
-        <p className="font-medium mb-2">PayPal is currently unavailable</p>
-        <p className="text-sm">{paypalError}</p>
-        <button 
-          className="mt-3 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-          onClick={() => window.location.reload()}
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ maxWidth: 400, width: '100%' }}>
+    <div className="w-full max-w-md mx-auto">
       <PayPalButtons
+        createOrder={createOrder}
+        onApprove={onApprove}
+        onError={onError}
         style={{
-          layout: 'vertical',
-          color: 'gold',
-          shape: 'rect',
-          label: 'paypal',
+          layout: "vertical",
+          color: "blue",
+          shape: "rect",
+          label: "pay"
         }}
-        createOrder={(data, actions) => {
-          return actions.order.create({
-            purchase_units: [{
-              amount: {
-                value: amount.toString(),
-              },
-            }],
-          });
-        }}
-        onApprove={(data, actions) => {
-          return actions.order!.capture().then((details) => {
-            const paymentData: PayPalPaymentData = {
-              paymentID: details.id,
-              orderID: data.orderID,
-              payerName: details.payer?.name?.given_name || 'Unknown',
-              amount: amount,
-              status: 'completed'
-            };
-            
-            onPaymentComplete(paymentData);
-            alert('Payment completed successfully! You can now submit your order.');
-          });
-        }}
-        onError={(err) => {
-          console.error('PayPal error:', err);
-          setPaypalError('Payment failed. Please try again.');
-        }}
+        disabled={isProcessing}
       />
+      
+      <p className="text-xs text-gray-500 mt-2 text-center">
+        Secure payment processed by PayPal
+      </p>
     </div>
   );
 } 

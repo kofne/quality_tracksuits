@@ -163,6 +163,158 @@ function generateOrderEmail(orderData: OrderFormData) {
 }
 
 /**
+ * Generate tracksuit order notification email
+ */
+function generateTracksuitOrderEmail(orderData: OrderFormData) {
+  const cartItemsList = orderData.cartItems.map(item => 
+    `<li><strong>${item.itemName}</strong> (${item.category}) - Size: ${item.selectedSize} - Qty: ${item.quantity} - $${item.price * item.quantity}</li>`
+  ).join('');
+  
+  const referralInfo = orderData.referralCode ? `
+    <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+      <h3 style="margin-top: 0; color: #92400e;">Referral Information</h3>
+      <p><strong>Referral Code Used:</strong> ${orderData.referralCode}</p>
+      ${orderData.referredBy ? `<p><strong>Referred By:</strong> ${orderData.referredBy}</p>` : ''}
+    </div>
+  ` : '';
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>New Tracksuit Order</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #059669;">🎉 New Tracksuit Order Received!</h2>
+        
+        <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+          <h3 style="margin-top: 0; color: #065f46;">Customer Information</h3>
+          
+          <p><strong>Name:</strong> ${orderData.name}</p>
+          <p><strong>Email:</strong> <a href="mailto:${orderData.email}">${orderData.email}</a></p>
+          <p><strong>WhatsApp:</strong> ${orderData.whatsapp}</p>
+          <p><strong>Delivery Address:</strong></p>
+          <div style="background: white; padding: 15px; border-radius: 4px; margin: 10px 0;">
+            ${orderData.deliveryAddress.replace(/\n/g, '<br>')}
+          </div>
+        </div>
+        
+        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #374151;">Order Details</h3>
+          
+          <p><strong>Total Items:</strong> ${orderData.totalQuantity}</p>
+          <p><strong>Total Amount:</strong> $${orderData.totalPrice.toFixed(2)}</p>
+          ${orderData.paymentId ? `<p><strong>Payment ID:</strong> ${orderData.paymentId}</p>` : ''}
+          
+          <h4 style="color: #374151; margin-top: 20px;">Items Ordered:</h4>
+          <ul style="margin: 10px 0; padding-left: 20px;">
+            ${cartItemsList}
+          </ul>
+        </div>
+        
+        ${referralInfo}
+        
+        <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p style="margin: 0; color: #1e40af;">
+            <strong>Status:</strong> Payment completed ✅
+          </p>
+        </div>
+        
+        <p style="color: #6b7280; font-size: 14px;">
+          Order received on: ${new Date().toLocaleString()}
+        </p>
+        
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+        
+        <p style="color: #6b7280; font-size: 12px;">
+          This tracksuit order was submitted after successful payment processing.
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return {
+    to: ADMIN_EMAIL,
+    subject: `New Tracksuit Order from ${orderData.name} - $${orderData.totalPrice.toFixed(2)}`,
+    html,
+  };
+}
+
+/**
+ * Generate customer confirmation email
+ */
+function generateCustomerConfirmationEmail(orderData: OrderFormData) {
+  const cartItemsList = orderData.cartItems.map(item => 
+    `<li><strong>${item.itemName}</strong> (${item.category}) - Size: ${item.selectedSize} - Qty: ${item.quantity} - $${item.price * item.quantity}</li>`
+  ).join('');
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Order Confirmation</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #059669;">🎉 Thank You for Your Order!</h2>
+        
+        <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+          <h3 style="margin-top: 0; color: #065f46;">Order Summary</h3>
+          
+          <p><strong>Order Date:</strong> ${new Date().toLocaleString()}</p>
+          <p><strong>Total Items:</strong> ${orderData.totalQuantity}</p>
+          <p><strong>Total Amount:</strong> $${orderData.totalPrice.toFixed(2)}</p>
+          ${orderData.paymentId ? `<p><strong>Payment ID:</strong> ${orderData.paymentId}</p>` : ''}
+        </div>
+        
+        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #374151;">Items Ordered</h3>
+          <ul style="margin: 10px 0; padding-left: 20px;">
+            ${cartItemsList}
+          </ul>
+        </div>
+        
+        <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #92400e;">Delivery Information</h3>
+          <p><strong>Delivery Address:</strong></p>
+          <div style="background: white; padding: 15px; border-radius: 4px; margin: 10px 0;">
+            ${orderData.deliveryAddress.replace(/\n/g, '<br>')}
+          </div>
+          <p style="margin-top: 15px;"><strong>Estimated Delivery:</strong> 4-7 business days</p>
+        </div>
+        
+        <div style="background: #dbeafe; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p style="margin: 0; color: #1e40af;">
+            <strong>Status:</strong> Order confirmed and processing ✅
+          </p>
+        </div>
+        
+        <p style="color: #6b7280; font-size: 14px;">
+          We'll send you updates on your order status. Thank you for choosing our tracksuits!
+        </p>
+        
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+        
+        <p style="color: #6b7280; font-size: 12px;">
+          If you have any questions, please contact our customer support.
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return {
+    to: orderData.email,
+    subject: `Order Confirmation - $${orderData.totalPrice.toFixed(2)}`,
+    html,
+  };
+}
+
+/**
  * Send contact form notification email
  */
 export async function sendContactNotification(contactData: ContactFormData) {
@@ -175,5 +327,21 @@ export async function sendContactNotification(contactData: ContactFormData) {
  */
 export async function sendOrderNotification(orderData: OrderFormData) {
   const emailData = generateOrderEmail(orderData);
+  return await sendEmail(emailData);
+}
+
+/**
+ * Send tracksuit order notification email to admin
+ */
+export async function sendTracksuitOrderNotification(orderData: OrderFormData) {
+  const emailData = generateTracksuitOrderEmail(orderData);
+  return await sendEmail(emailData);
+}
+
+/**
+ * Send customer confirmation email
+ */
+export async function sendCustomerConfirmation(orderData: OrderFormData) {
+  const emailData = generateCustomerConfirmationEmail(orderData);
   return await sendEmail(emailData);
 } 
